@@ -36,6 +36,10 @@ export const MenuBar: FunctionComponent = () => {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [pdfUrl, setPdfUrl] = useState("");
 
+  // Add state for Virtual Try On modal and URL
+  const [showTryOnModal, setShowTryOnModal] = useState(false);
+  const [tryOnUrl, setTryOnUrl] = useState("");
+
   // Loading states
   const [isVirtualTryOnLoading, setIsVirtualTryOnLoading] = useState(false);
   const [isShareLoading, setIsShareLoading] = useState(false);
@@ -56,7 +60,8 @@ export const MenuBar: FunctionComponent = () => {
       getTryOnUrl()
         .then((url) => {
           if (url) {
-            window.open(url, "_blank");
+            setTryOnUrl(url);
+            setShowTryOnModal(true);
           } else {
             console.log("Virtual try on URL not available");
           }
@@ -167,16 +172,27 @@ export const MenuBar: FunctionComponent = () => {
 
   return (
     <>
-      <div className="flex space-x-2 items-center justify-center">
+      {/* Bottom controls */}
+      <div
+        className="
+          fixed bottom-6 left-4 md:left-1/2 md:-translate-x-1/2 
+          flex md:flex-row flex-col
+          md:space-x-4 md:space-y-0 space-y-3
+          items-center md:justify-center justify-start
+          bg-white/80 md:bg-white/80 
+          p-3 rounded-lg shadow-md
+          z-10
+        "
+      >
         <button
-          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+          className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
           onClick={handleZoomIn}
           title="Zoom In"
         >
           <ZoomInIcon />
         </button>
         <button
-          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+          className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
           onClick={handleZoomOut}
           title="Zoom Out"
         >
@@ -244,6 +260,42 @@ export const MenuBar: FunctionComponent = () => {
             >
               Download
             </a>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Virtual Try On QR Code Modal */}
+      <Dialog open={showTryOnModal} onOpenChange={setShowTryOnModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Virtual Try On</DialogTitle>
+            <DialogDescription>
+              Scan this QR code with your mobile device to try on this product
+              virtually.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            {tryOnUrl && (
+              <div className="bg-white p-4 rounded-md">
+                {/* You'll need to install react-qr-code: npm install react-qr-code */}
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+                    tryOnUrl
+                  )}`}
+                  alt="QR Code for Virtual Try On"
+                  width={300}
+                  height={300}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter className="flex justify-end space-x-2 sm:justify-end">
+            <button
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              onClick={() => setShowTryOnModal(false)}
+            >
+              Close
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

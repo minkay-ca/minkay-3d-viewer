@@ -11,20 +11,6 @@ import { MenuBar } from "./menu";
 import { useEffect, useState } from "react";
 
 export default function Viewer() {
-  // const { isViewerReady, isSceneLoading } = useZakeke();
-  // const [isReady, setIsReady] = useState(false);
-
-  // useEffect(() => {
-  //   if (!isViewerReady) {
-  //     return;
-  //   }
-
-  //   const timeout = setTimeout(() => {
-  //     setIsReady(true);
-  //   }, 5000);
-
-  //   return () => clearTimeout(timeout);
-  // }, [isViewerReady]);
   return (
     <>
       {/* Full screen container */}
@@ -34,13 +20,7 @@ export default function Viewer() {
           <ZakekeViewer className="bg-white" bgColor="#ffffff" />
         </div>
 
-        {/* Bottom controls */}
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-10">
-          {/* Menu Bar */}
-          <div className="bg-white/80 p-3 rounded-lg shadow-lg">
-            <MenuBar />
-          </div>
-        </div>
+        <MenuBar />
 
         {/* Customize dropdown positioned at bottom-right */}
         <div className="fixed bottom-6 right-6 z-10">
@@ -64,12 +44,31 @@ export default function Viewer() {
           </Popover>
         </div>
       </div>
-      {/* {!isReady && <LoadingOverlay />} */}
+      <LoadingOverlay />
     </>
   );
 }
 
 const LoadingOverlay = () => {
+  const { isViewerReady, isSceneLoading } = useZakeke();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    if (!isViewerReady) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setIsReady(true);
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [isViewerReady]);
+
+  if (isReady) {
+    return null;
+  }
+
   return (
     <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-20">
       <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
