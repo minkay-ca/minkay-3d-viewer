@@ -11,11 +11,6 @@ export default defineConfig({
     },
   },
   // For the zakeke-configurator-react global scripts
-  build: {
-    rollupOptions: {
-      external: ['globals*.js'],
-    },
-  },
   define: {
     // This will make these globals available in the code
     'window.BABYLON': 'window.BABYLON',
