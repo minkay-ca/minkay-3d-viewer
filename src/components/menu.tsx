@@ -129,7 +129,7 @@ export const MenuBar: FunctionComponent = () => {
       getMobileArUrl()
         .then((url) => {
           if (url) {
-            console.log(url);
+            console.log("**** url", url);
           } else {
             console.log("AR URL not available");
           }
