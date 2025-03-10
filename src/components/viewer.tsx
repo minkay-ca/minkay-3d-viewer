@@ -11,20 +11,20 @@ import { MenuBar } from "./menu";
 import { useEffect, useState } from "react";
 
 export default function Viewer() {
-  const { isViewerReady, isSceneLoading } = useZakeke();
-  const [isReady, setIsReady] = useState(false);
+  // const { isViewerReady, isSceneLoading } = useZakeke();
+  // const [isReady, setIsReady] = useState(false);
 
-  useEffect(() => {
-    if (!isViewerReady) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!isViewerReady) {
+  //     return;
+  //   }
 
-    const timeout = setTimeout(() => {
-      setIsReady(true);
-    }, 5000);
+  //   const timeout = setTimeout(() => {
+  //     setIsReady(true);
+  //   }, 5000);
 
-    return () => clearTimeout(timeout);
-  }, [isViewerReady]);
+  //   return () => clearTimeout(timeout);
+  // }, [isViewerReady]);
   return (
     <>
       {/* Full screen container */}
@@ -64,7 +64,7 @@ export default function Viewer() {
           </Popover>
         </div>
       </div>
-      {!isReady && <LoadingOverlay />}
+      {/* {!isReady && <LoadingOverlay />} */}
     </>
   );
 }
