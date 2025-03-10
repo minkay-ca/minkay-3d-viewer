@@ -12,8 +12,7 @@ import { useEffect, useState } from "react";
 
 export default function Viewer() {
   const { isViewerReady, isSceneLoading } = useZakeke();
-
-  const [ready, setReady] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     if (!isViewerReady) {
@@ -21,19 +20,18 @@ export default function Viewer() {
     }
 
     const timeout = setTimeout(() => {
-      setReady(true);
+      setIsReady(true);
     }, 5000);
 
     return () => clearTimeout(timeout);
   }, [isViewerReady]);
-
   return (
-    <main>
+    <>
       {/* Full screen container */}
       <div className="relative h-full w-full">
         {/* Full screen viewer */}
         <div className="absolute inset-0">
-          <ZakekeViewer />
+          <ZakekeViewer className="bg-white" bgColor="#ffffff" />
         </div>
 
         {/* Bottom controls */}
@@ -66,16 +64,18 @@ export default function Viewer() {
           </Popover>
         </div>
       </div>
-
-      {/* Loading overlay */}
-      {!ready && (
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-20">
-          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
-            <div className="w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full animate-spin mb-4"></div>
-            <div className="text-lg font-medium">Loading scene...</div>
-          </div>
-        </div>
-      )}
-    </main>
+      {!isReady && <LoadingOverlay />}
+    </>
   );
 }
+
+const LoadingOverlay = () => {
+  return (
+    <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-20">
+      <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+        <div className="w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full animate-spin mb-4"></div>
+        <div className="text-lg font-medium">Loading scene...</div>
+      </div>
+    </div>
+  );
+};
