@@ -27,6 +27,9 @@ export const MenuBar: FunctionComponent = () => {
     getTryOnUrl,
     getShareCompositionUrl,
     getMobileArUrl,
+    getQrCodeArUrl,
+    hasVTryOnEnabled,
+    isSceneArEnabled,
   } = useZakeke();
 
   // State for PDF download modal
@@ -89,6 +92,7 @@ export const MenuBar: FunctionComponent = () => {
       setIsShareLoading(true);
       getShareCompositionUrl()
         .then((url) => {
+          console.log("**** url", url);
           if (url) {
             // If Web Share API is available
             if (navigator.share) {
@@ -178,14 +182,16 @@ export const MenuBar: FunctionComponent = () => {
         >
           <ZoomOutIcon />
         </button>
-        <button
-          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
-          onClick={handleVirtualTryOn}
-          disabled={isVirtualTryOnLoading}
-          title="Virtual Try On"
-        >
-          {isVirtualTryOnLoading ? <LoadingSpinner /> : <VirtualTryOnIcon />}
-        </button>
+        {hasVTryOnEnabled && (
+          <button
+            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+            onClick={handleVirtualTryOn}
+            disabled={isVirtualTryOnLoading}
+            title="Virtual Try On"
+          >
+            {isVirtualTryOnLoading ? <LoadingSpinner /> : <VirtualTryOnIcon />}
+          </button>
+        )}
         <button
           className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
           onClick={handleExportPdf}
@@ -194,7 +200,7 @@ export const MenuBar: FunctionComponent = () => {
         >
           {isPdfLoading ? <LoadingSpinner /> : <ExportPdfIcon />}
         </button>
-        <button
+        {/* <button
           className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
           onClick={handleShare}
           disabled={isShareLoading}
@@ -209,7 +215,7 @@ export const MenuBar: FunctionComponent = () => {
           title="View in AR"
         >
           {isARLoading ? <LoadingSpinner /> : <ARIcon />}
-        </button>
+        </button> */}
       </div>
 
       {/* PDF Download Modal using ShadCN Dialog */}
@@ -231,6 +237,7 @@ export const MenuBar: FunctionComponent = () => {
             </button>
             <a
               href={pdfUrl}
+              target="_blank"
               download="custom-design.pdf"
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               onClick={() => setShowPdfModal(false)}
