@@ -15,6 +15,12 @@ import {
   ChevronDownIcon,
   ARIcon,
 } from "./icons";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 const zakekeEnvironment = new ZakekeEnvironment();
 
@@ -279,38 +285,34 @@ const App: FunctionComponent<{}> = () => {
           <ZakekeViewer />
         </div>
 
-        {/* Bottom center control bar */}
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-10 flex items-center space-x-4">
-          {/* Left side: Menu Bar */}
+        {/* Bottom controls */}
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-10">
+          {/* Menu Bar */}
           <div className="bg-white/80 p-3 rounded-lg shadow-lg">
             <MenuBar />
           </div>
+        </div>
 
-          {/* Right side: Selector Button */}
-          <div className="relative">
-            <button
-              ref={buttonRef}
-              className="bg-white p-2 rounded-md shadow-md flex items-center space-x-2"
-              onClick={() => setSelectorVisible(!selectorVisible)}
-            >
-              <span>Customize</span>
-              <ChevronDownIcon
-                className={`h-5 w-5 transition-transform ${
-                  selectorVisible ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            {/* Selector dropdown */}
-            {selectorVisible && (
-              <div
-                ref={selectorRef}
-                className="absolute bottom-full right-0 mb-2 bg-white rounded-md shadow-lg p-4 w-80 max-h-[70vh] overflow-auto"
+        {/* Customize dropdown positioned at bottom-right */}
+        <div className="fixed bottom-6 right-6 z-10">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="bg-white p-2 rounded-md shadow-md flex items-center space-x-2"
               >
-                <Selector />
-              </div>
-            )}
-          </div>
+                <span>Customize</span>
+                <ChevronDownIcon className={`h-5 w-5`} />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-80 max-h-[70vh] overflow-auto"
+              side="top"
+              align="end"
+            >
+              <Selector />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </ZakekeProvider>

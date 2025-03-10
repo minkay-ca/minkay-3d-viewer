@@ -1,42 +1,29 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useZakeke } from "zakeke-configurator-react";
-import { List, ListItem, ListItemImage } from "./list";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { ChevronDownIcon } from "./icons";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
-// Reusable dropdown component
-interface DropdownProps {
-  title: string;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-}
-
-const Dropdown: FunctionComponent<DropdownProps> = ({
-  title,
-  children,
-  defaultOpen = false,
-}) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
-  return (
-    <div className="border border-gray-200 rounded-md overflow-hidden mb-3">
-      <div
-        className="flex justify-between items-center p-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <div className="font-medium">{title}</div>
-        <ChevronDownIcon
-          className={`h-5 w-5 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
-      </div>
-
-      {isOpen && <div className="p-2 border-t border-gray-200">{children}</div>}
-    </div>
-  );
-};
-
-const Selector: FunctionComponent<{}> = () => {
+const Selector: React.FC = () => {
   const {
     isSceneLoading,
     groups,
@@ -96,98 +83,146 @@ const Selector: FunctionComponent<{}> = () => {
   }, [selectedGroupId]);
 
   if (isSceneLoading || !groups || groups.length === 0)
-    return <span>Loading scene...</span>;
+    return (
+      <span className="text-sm text-muted-foreground animate-pulse">
+        Loading scene...
+      </span>
+    );
 
-  // Current selected names for dropdown titles
+  // Current selected names for dropdown labels
   const selectedGroupName = selectedGroup
     ? selectedGroup.id === -1
       ? "Other"
       : selectedGroup.name
     : "Select a group";
-  const selectedStepName = selectedStep ? selectedStep.name : "Select a step";
   const selectedAttributeName = selectedAttribute
     ? selectedAttribute.name
     : "Select an attribute";
-  const selectedOptionName =
-    selectedAttribute?.options.find((o) => o.selected)?.name ||
-    "Select an option";
 
   return (
-    <div className="space-y-4">
-      <div className="font-medium text-lg border-b pb-2 mb-4">
+    <div className="space-y-6 p-1">
+      <div className="text-xl font-semibold border-b pb-2 mb-4">
         Customize Product
       </div>
 
       {/* Only show groups dropdown if there's more than one group */}
       {groups.length > 1 && (
-        <Dropdown title={`Group: ${selectedGroupName}`} defaultOpen={true}>
-          <List>
-            {groups.map((group) => (
-              <ListItem
-                key={group.id}
-                onClick={() => selectGroup(group.id)}
-                selected={selectedGroup === group}
-              >
-                {group.id === -1 ? "Other" : group.name}
-              </ListItem>
-            ))}
-          </List>
-        </Dropdown>
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium">Group</h3>
+          <Select
+            value={selectedGroupId?.toString()}
+            onValueChange={(value) => selectGroup(parseInt(value))}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a group" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {groups.map((group) => (
+                  <SelectItem key={group.id} value={group.id.toString()}>
+                    {group.id === -1 ? "Other" : group.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       )}
 
-      {/* Steps dropdown, only show if there are steps available */}
+      {/* Steps accordion, only show if there are steps available */}
       {selectedGroup && selectedGroup.steps.length > 0 && (
-        <Dropdown title={`Step: ${selectedStepName}`} defaultOpen={true}>
-          <List>
-            {selectedGroup.steps.map((step) => (
-              <ListItem
-                key={step.id}
-                onClick={() => selectStep(step.id)}
-                selected={selectedStep === step}
-              >
-                {step.name}
-              </ListItem>
-            ))}
-          </List>
-        </Dropdown>
+        <Accordion
+          type="single"
+          collapsible
+          defaultValue="steps"
+          className="border rounded-md"
+        >
+          <AccordionItem value="steps">
+            <AccordionTrigger className="px-4">Steps</AccordionTrigger>
+            <AccordionContent className="px-4 pt-2 pb-3">
+              <div className="flex flex-wrap gap-2">
+                {selectedGroup.steps.map((step) => (
+                  <Badge
+                    key={step.id}
+                    variant={selectedStep === step ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => selectStep(step.id)}
+                  >
+                    {step.name}
+                  </Badge>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       )}
 
       {/* Attributes dropdown */}
       {attributes.length > 0 && (
-        <Dropdown
-          title={`Attribute: ${selectedAttributeName}`}
-          defaultOpen={true}
-        >
-          <List>
-            {attributes.map((attribute) => (
-              <ListItem
-                key={attribute.id}
-                onClick={() => selectAttribute(attribute.id)}
-                selected={selectedAttribute === attribute}
-              >
-                {attribute.name}
-              </ListItem>
-            ))}
-          </List>
-        </Dropdown>
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium">Attributes</h3>
+          <Select
+            value={selectedAttributeId?.toString()}
+            onValueChange={(value) => selectAttribute(parseInt(value))}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select an attribute" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {attributes.map((attribute) => (
+                  <SelectItem
+                    key={attribute.id}
+                    value={attribute.id.toString()}
+                  >
+                    {attribute.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       )}
 
       {/* Options dropdown */}
       {selectedAttribute && selectedAttribute.options.length > 0 && (
-        <Dropdown title={`Option: ${selectedOptionName}`} defaultOpen={true}>
-          <List>
-            {selectedAttribute.options.map((option) => (
-              <ListItem
-                key={option.id}
-                onClick={() => selectOption(option.id)}
-                selected={option.selected}
-              >
-                {option.imageUrl && <ListItemImage src={option.imageUrl} />}
-                {option.name}
-              </ListItem>
-            ))}
-          </List>
-        </Dropdown>
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium">
+            Options for {selectedAttribute.name}
+          </h3>
+          <Select
+            value={
+              selectedAttribute.options
+                .find((opt) => opt.selected)
+                ?.id.toString() || ""
+            }
+            onValueChange={(value) => selectOption(parseInt(value))}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select an option" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {selectedAttribute.options.map((option) => (
+                  <SelectItem key={option.id} value={option.id.toString()}>
+                    <div className="flex items-center">
+                      {option.imageUrl && (
+                        <div className="w-6 h-6 mr-2 overflow-hidden rounded-sm">
+                          <img
+                            src={option.imageUrl}
+                            alt={option.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <span>{option.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       )}
     </div>
   );
