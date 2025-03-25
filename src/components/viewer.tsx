@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 
 export default function Viewer() {
   return (
-    <>
+    <div className="h-screen w-screen">
       {/* Full screen container */}
       <div className="relative h-full w-full">
         {/* Full screen viewer */}
@@ -45,7 +45,7 @@ export default function Viewer() {
         </div>
       </div>
       <LoadingOverlay />
-    </>
+    </div>
   );
 }
 
