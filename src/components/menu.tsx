@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FunctionComponent } from "react";
-import { useZakeke } from "zakeke-configurator-react";
+import { useZakeke, ZakekeTryOnViewer } from "zakeke-configurator-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   ZoomInIcon,
   ZoomOutIcon,
@@ -20,6 +21,9 @@ import {
 
 // Create a MenuBar component for the bottom-center menu actions
 export const MenuBar: FunctionComponent = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const {
     zoomIn,
     zoomOut,
@@ -27,18 +31,19 @@ export const MenuBar: FunctionComponent = () => {
     getTryOnUrl,
     getShareCompositionUrl,
     getMobileArUrl,
-    getQrCodeArUrl,
     hasVTryOnEnabled,
     isSceneArEnabled,
+    getTryOnSettings,
   } = useZakeke();
 
+  const tryOnSettings = getTryOnSettings();
+
+  const tryOnEnabled = useMemo(() => {
+    return tryOnSettings && hasVTryOnEnabled;
+  }, [getTryOnSettings, hasVTryOnEnabled]);
   // State for PDF download modal
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [pdfUrl, setPdfUrl] = useState("");
-
-  // Add state for Virtual Try On modal and URL
-  const [showTryOnModal, setShowTryOnModal] = useState(false);
-  const [tryOnUrl, setTryOnUrl] = useState("");
 
   // Loading states
   const [isVirtualTryOnLoading, setIsVirtualTryOnLoading] = useState(false);
@@ -55,19 +60,13 @@ export const MenuBar: FunctionComponent = () => {
   };
 
   const handleVirtualTryOn = () => {
-    if (getTryOnUrl) {
-      setIsVirtualTryOnLoading(true);
-      getTryOnUrl()
-        .then((url) => {
-          if (url) {
-            setTryOnUrl(url);
-            setShowTryOnModal(true);
-          } else {
-            console.log("Virtual try on URL not available");
-          }
-        })
-        .catch((err) => console.error("Failed to get try-on URL:", err))
-        .finally(() => setIsVirtualTryOnLoading(false));
+    if (tryOnEnabled) {
+      const settings = getTryOnSettings();
+      console.log("**** settings", settings);
+
+      // Use react-router-dom's navigate and location
+      const currentPathWithSearch = location.pathname + location.search;
+      navigate(`/vto${currentPathWithSearch}`, { replace: false });
     } else {
       console.log("Virtual try on feature not available");
     }
@@ -260,42 +259,6 @@ export const MenuBar: FunctionComponent = () => {
             >
               Download
             </a>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Virtual Try On QR Code Modal */}
-      <Dialog open={showTryOnModal} onOpenChange={setShowTryOnModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Virtual Try On</DialogTitle>
-            <DialogDescription>
-              Scan this QR code with your mobile device to try on this product
-              virtually.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center py-4">
-            {tryOnUrl && (
-              <div className="bg-white p-4 rounded-md">
-                {/* You'll need to install react-qr-code: npm install react-qr-code */}
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
-                    tryOnUrl
-                  )}`}
-                  alt="QR Code for Virtual Try On"
-                  width={300}
-                  height={300}
-                />
-              </div>
-            )}
-          </div>
-          <DialogFooter className="flex justify-end space-x-2 sm:justify-end">
-            <button
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              onClick={() => setShowTryOnModal(false)}
-            >
-              Close
-            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
