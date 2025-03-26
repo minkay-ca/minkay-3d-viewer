@@ -11,6 +11,21 @@ import { MenuBar } from "./menu";
 import { useEffect, useState } from "react";
 
 export default function Viewer() {
+  const [isReady, setIsReady] = useState(false);
+  const { isViewerReady } = useZakeke();
+
+  useEffect(() => {
+    if (!isViewerReady) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setIsReady(true);
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [isViewerReady]);
+
   return (
     <div className="h-screen w-screen">
       {/* Full screen container */}
@@ -44,37 +59,14 @@ export default function Viewer() {
           </Popover>
         </div>
       </div>
-      <LoadingOverlay />
+      {!isReady && (
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-20">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full animate-spin mb-4"></div>
+            <div className="text-lg font-medium">Loading scene...</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-const LoadingOverlay = () => {
-  const { isViewerReady, isSceneLoading } = useZakeke();
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    if (!isViewerReady) {
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      setIsReady(true);
-    }, 5000);
-
-    return () => clearTimeout(timeout);
-  }, [isViewerReady]);
-
-  if (isReady) {
-    return null;
-  }
-
-  return (
-    <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-20">
-      <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
-        <div className="w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full animate-spin mb-4"></div>
-        <div className="text-lg font-medium">Loading scene...</div>
-      </div>
-    </div>
-  );
-};

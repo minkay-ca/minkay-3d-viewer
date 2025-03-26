@@ -1,12 +1,9 @@
 import { ZakekeEnvironment, ZakekeProvider } from "zakeke-configurator-react";
-import Viewer from "./viewer";
 
 const zakekeEnvironment = new ZakekeEnvironment();
 
-export default function ZakekeApp() {
+export default function ZakekeApp({ children }: { children: React.ReactNode }) {
   return (
-    <ZakekeProvider environment={zakekeEnvironment}>
-      <Viewer />
-    </ZakekeProvider>
+    <ZakekeProvider environment={zakekeEnvironment}>{children}</ZakekeProvider>
   );
 }
