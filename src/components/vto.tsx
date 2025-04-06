@@ -4,14 +4,18 @@ import {
   ZakekeTryOnViewer,
 } from "zakeke-configurator-react";
 import { useEffect, useState } from "react";
+import { isAndroid, isIOS } from "react-device-detect";
+
 export default function VTOViewer() {
   const [isReady, setIsReady] = useState(false);
   const [tryOnLoaded, setTryOnLoaded] = useState(false);
-  const { hasVTryOnEnabled, getTryOnSettings } = useZakeke();
+  const { hasVTryOnEnabled, getTryOnSettings, deepARsceneGLBUrl } = useZakeke();
+  const { tryOnVisibility, setTryOnVisibility } = useZakekeTryOn();
   const tryOnSettings = getTryOnSettings();
 
   useEffect(() => {
     if (hasVTryOnEnabled && tryOnSettings) {
+      setTryOnVisibility(true);
       setTryOnLoaded(true);
     }
   }, [hasVTryOnEnabled, tryOnSettings]);
@@ -19,6 +23,10 @@ export default function VTOViewer() {
   console.group("****tryOnLoaded", tryOnLoaded);
   console.log("hasVTryOnEnabled", hasVTryOnEnabled);
   console.log("tryOnSettings", tryOnSettings);
+  console.log("deepARsceneGLBUrl", deepARsceneGLBUrl);
+  console.log("tryOnVisibility", tryOnVisibility);
+  console.log("isAndroid", isAndroid);
+  console.log("isIOS", isIOS);
   console.groupEnd();
 
   return (
@@ -29,24 +37,31 @@ export default function VTOViewer() {
         <div className="relative h-full w-full">
           {/* Full screen viewer */}
           <div className="absolute inset-0">
-            <ZakekeTryOnViewer
-              onReady={() => {
-                console.log("***** onReady");
-              }}
-              onLoaded={() => {
-                console.log("***** onLoaded");
-                setIsReady(true);
-              }}
-              onPDUpdated={() => {
-                console.log("***** onPDUpdated");
-              }}
-              onClose={() => {
-                console.log("***** onClose");
-              }}
-              onWebcamError={() => {
-                console.log("***** onWebcamError");
-              }}
-            />
+            {hasVTryOnEnabled &&
+            tryOnSettings &&
+            tryOnSettings?.type === 6 &&
+            !(isAndroid || isIOS) ? (
+              <div />
+            ) : (
+              <ZakekeTryOnViewer
+                onReady={() => {
+                  console.log("***** onReady");
+                }}
+                onLoaded={() => {
+                  console.log("***** onLoaded");
+                  setIsReady(true);
+                }}
+                onPDUpdated={() => {
+                  console.log("***** onPDUpdated");
+                }}
+                onClose={() => {
+                  console.log("***** onClose");
+                }}
+                onWebcamError={() => {
+                  console.log("***** onWebcamError");
+                }}
+              />
+            )}
           </div>
         </div>
       )}
