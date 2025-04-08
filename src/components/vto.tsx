@@ -38,7 +38,8 @@ export default function VTOViewer() {
           if (!(isAndroid || isIOS)) {
             setDeepARUrl(url);
           } else {
-            window.location.replace(url);
+            console.log("***** redirecting to", url);
+            window.location.href = url;
           }
           setIsReady(true);
         })
