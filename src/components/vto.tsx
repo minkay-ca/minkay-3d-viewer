@@ -35,7 +35,11 @@ export default function VTOViewer() {
       getDeepARDesktopIframeUrl()
         .then((url) => {
           console.log("***** url", url);
-          setDeepARUrl(url);
+          if (!(isAndroid || isIOS)) {
+            setDeepARUrl(url);
+          } else {
+            window.location.replace(url);
+          }
           setIsReady(true);
         })
         .catch((error) => {
@@ -56,8 +60,7 @@ export default function VTOViewer() {
             tryOnSettings &&
             tryOnSettings?.type === 6 &&
             !!deeparUrl &&
-            deeparUrl?.startsWith("https://") &&
-            !(isAndroid || isIOS) ? (
+            deeparUrl?.startsWith("https://") ? (
               <div className="flex items-center justify-center h-full">
                 <div className="bg-white p-8 rounded-lg shadow-lg">
                   <h2 className="text-xl font-semibold mb-4">Scan QR Code</h2>
