@@ -5,6 +5,7 @@ import {
 } from "zakeke-configurator-react";
 import { useEffect, useState } from "react";
 import { isAndroid, isIOS } from "react-device-detect";
+import { Link } from "react-router-dom";
 
 export default function VTOViewer() {
   const [isReady, setIsReady] = useState(false);
@@ -35,12 +36,7 @@ export default function VTOViewer() {
       getDeepARDesktopIframeUrl()
         .then((url) => {
           console.log("***** url", url);
-          if (!(isAndroid || isIOS)) {
-            setDeepARUrl(url);
-          } else {
-            console.log("***** redirecting to", url);
-            window.location.href = url;
-          }
+          setDeepARUrl(url);
           setIsReady(true);
         })
         .catch((error) => {
@@ -77,6 +73,17 @@ export default function VTOViewer() {
                   <p className="text-sm text-gray-600 text-center">
                     Scan this code with your mobile device to try on
                   </p>
+                  <p className="text-sm text-gray-600 text-center">
+                    Or click the button below to try on
+                  </p>
+                  <Link
+                    to={deeparUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-primary text-white px-4 py-2 rounded-md inline-block"
+                  >
+                    Try On
+                  </Link>
                 </div>
               </div>
             ) : (
