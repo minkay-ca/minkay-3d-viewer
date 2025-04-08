@@ -8,8 +8,10 @@ import { isAndroid, isIOS } from "react-device-detect";
 
 export default function VTOViewer() {
   const [isReady, setIsReady] = useState(false);
+  const [deeparUrl, setDeepARUrl] = useState("");
   const [tryOnLoaded, setTryOnLoaded] = useState(false);
-  const { hasVTryOnEnabled, getTryOnSettings, deepARsceneGLBUrl } = useZakeke();
+  const { hasVTryOnEnabled, getTryOnSettings, getDeepARDesktopIframeUrl } =
+    useZakeke();
   const { tryOnVisibility, setTryOnVisibility } = useZakekeTryOn();
   const tryOnSettings = getTryOnSettings();
 
@@ -23,11 +25,24 @@ export default function VTOViewer() {
   console.group("****tryOnLoaded", tryOnLoaded);
   console.log("hasVTryOnEnabled", hasVTryOnEnabled);
   console.log("tryOnSettings", tryOnSettings);
-  console.log("deepARsceneGLBUrl", deepARsceneGLBUrl);
   console.log("tryOnVisibility", tryOnVisibility);
   console.log("isAndroid", isAndroid);
   console.log("isIOS", isIOS);
   console.groupEnd();
+
+  useEffect(() => {
+    if (hasVTryOnEnabled && tryOnSettings && tryOnSettings?.type === 6) {
+      getDeepARDesktopIframeUrl()
+        .then((url) => {
+          console.log("***** url", url);
+          setDeepARUrl(url);
+          setIsReady(true);
+        })
+        .catch((error) => {
+          console.error("***** error", error);
+        });
+    }
+  }, [hasVTryOnEnabled, tryOnSettings]);
 
   return (
     <div className="h-screen w-screen">
@@ -40,8 +55,26 @@ export default function VTOViewer() {
             {hasVTryOnEnabled &&
             tryOnSettings &&
             tryOnSettings?.type === 6 &&
+            !!deeparUrl &&
+            deeparUrl?.startsWith("https://") &&
             !(isAndroid || isIOS) ? (
-              <div />
+              <div className="flex items-center justify-center h-full">
+                <div className="bg-white p-8 rounded-lg shadow-lg">
+                  <h2 className="text-xl font-semibold mb-4">Scan QR Code</h2>
+                  <div className="mb-4">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(
+                        deeparUrl
+                      )}`}
+                      alt="QR Code"
+                      className="w-64 h-64"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 text-center">
+                    Scan this code with your mobile device to try on
+                  </p>
+                </div>
+              </div>
             ) : (
               <ZakekeTryOnViewer
                 onReady={() => {
