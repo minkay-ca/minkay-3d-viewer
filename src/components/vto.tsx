@@ -11,8 +11,13 @@ export default function VTOViewer() {
   const [isReady, setIsReady] = useState(false);
   const [deeparUrl, setDeepARUrl] = useState("");
   const [tryOnLoaded, setTryOnLoaded] = useState(false);
-  const { hasVTryOnEnabled, getTryOnSettings, getDeepARDesktopIframeUrl } =
-    useZakeke();
+  const {
+    hasVTryOnEnabled,
+    getTryOnSettings,
+    getDeepARDesktopIframeUrl,
+    getQrCodeArUrl,
+    getMobileArUrl,
+  } = useZakeke();
   const { tryOnVisibility, setTryOnVisibility } = useZakekeTryOn();
   const tryOnSettings = getTryOnSettings();
 
@@ -33,15 +38,54 @@ export default function VTOViewer() {
 
   useEffect(() => {
     if (hasVTryOnEnabled && tryOnSettings && tryOnSettings?.type === 6) {
-      getDeepARDesktopIframeUrl()
-        .then((url) => {
-          console.log("***** url", url);
-          setDeepARUrl(url);
-          setIsReady(true);
-        })
-        .catch((error) => {
-          console.error("***** error", error);
-        });
+      if (isAndroid || isIOS) {
+        alert(
+          JSON.stringify({
+            isAndroid,
+            isIOS,
+            hasVTryOnEnabled,
+            tryOnSettings,
+          })
+        );
+        // getMobileArUrl()
+        //   .then((url) => {
+        //     console.log("***** url", url);
+        //     setDeepARUrl(url);
+        //     setIsReady(true);
+        //     alert(
+        //       JSON.stringify({
+        //         url,
+        //         hasVTryOnEnabled,
+        //         tryOnSettings,
+        //       })
+        //     );
+        //   })
+        //   .catch((error) => {
+        //     console.error("***** error", error);
+        //     alert(
+        //       JSON.stringify({
+        //         error: error?.message,
+        //       })
+        //     );
+        //   });
+      } else {
+        getDeepARDesktopIframeUrl()
+          .then((url) => {
+            console.log("***** url", url);
+            setDeepARUrl(url);
+            setIsReady(true);
+          })
+          .catch((error) => {
+            console.error("***** error", error);
+            alert(
+              JSON.stringify({
+                error,
+                hasVTryOnEnabled,
+                tryOnSettings,
+              })
+            );
+          });
+      }
     }
   }, [hasVTryOnEnabled, tryOnSettings]);
 
@@ -49,15 +93,14 @@ export default function VTOViewer() {
     <div className="h-screen w-screen">
       {/* Full screen container */}
 
-      {tryOnLoaded && (
+      {tryOnLoaded && tryOnSettings && hasVTryOnEnabled && (
         <div className="relative h-full w-full">
           {/* Full screen viewer */}
           <div className="absolute inset-0">
-            {hasVTryOnEnabled &&
-            tryOnSettings &&
-            tryOnSettings?.type === 6 &&
+            {tryOnSettings?.type === 6 &&
             !!deeparUrl &&
-            deeparUrl?.startsWith("https://") ? (
+            deeparUrl?.startsWith("https://") &&
+            (!isAndroid || !isIOS) ? (
               <div className="flex items-center justify-center h-full">
                 <div className="bg-white p-8 rounded-lg shadow-lg">
                   <h2 className="text-xl font-semibold mb-4">Scan QR Code</h2>
@@ -70,17 +113,17 @@ export default function VTOViewer() {
                       className="w-64 h-64"
                     />
                   </div>
-                  <p className="text-sm text-gray-600 text-center">
+                  <p className="text-sm text-gray-600 text-left">
                     Scan this code with your mobile device to try on
                   </p>
-                  <p className="text-sm text-gray-600 text-center">
+                  <p className="text-sm text-gray-600 text-left">
                     Or click the button below to try on
                   </p>
                   <Link
                     to={deeparUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-primary text-white px-4 py-2 rounded-md inline-block"
+                    className="bg-primary text-white px-4 py-2 rounded-md inline-block mt-6"
                   >
                     Try On
                   </Link>
@@ -89,19 +132,24 @@ export default function VTOViewer() {
             ) : (
               <ZakekeTryOnViewer
                 onReady={() => {
+                  alert("***** onReady");
                   console.log("***** onReady");
                 }}
                 onLoaded={() => {
+                  alert("***** onLoaded");
                   console.log("***** onLoaded");
                   setIsReady(true);
                 }}
                 onPDUpdated={() => {
+                  alert("***** onPDUpdated");
                   console.log("***** onPDUpdated");
                 }}
                 onClose={() => {
+                  alert("***** onClose");
                   console.log("***** onClose");
                 }}
                 onWebcamError={() => {
+                  alert("***** onWebcamError");
                   console.log("***** onWebcamError");
                 }}
               />
