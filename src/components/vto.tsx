@@ -117,17 +117,17 @@ export default function VTOViewer() {
                           className="w-64 h-64"
                         />
                       </div>
-                      <p className="text-sm text-gray-600 text-center">
+                      <p className="text-sm text-gray-600 text-left">
                         Scan this code with your mobile device to try on
                       </p>
-                      <p className="text-sm text-gray-600 text-center">
+                      <p className="text-sm mt-2 text-gray-600 text-left">
                         Or click the button below to try on
                       </p>
                       <Link
                         to={deeparUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-primary text-white px-4 py-2 rounded-md inline-block"
+                        className="bg-primary text-white px-4 py-2 rounded-md inline-block mt-8"
                       >
                         Try On
                       </Link>
