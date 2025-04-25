@@ -4,16 +4,18 @@ import {
   ZakekeTryOnExposedMethods,
   ZakekeTryOnViewer,
 } from "zakeke-configurator-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isAndroid, isIOS } from "react-device-detect";
-import { Link } from "react-router-dom";
 
 export default function VTOViewer() {
   const viewerRef = useRef<ZakekeTryOnExposedMethods>(null);
   const [isReady, setIsReady] = useState(false);
-
+  const [status, setStatus] = useState({
+    errorType: "",
+    isError: false,
+    message: "",
+  });
   const [deeparUrl, setDeepARUrl] = useState("");
-  const [tryOnLoaded, setTryOnLoaded] = useState(false);
   const {
     hasVTryOnEnabled,
     getTryOnSettings,
@@ -21,7 +23,6 @@ export default function VTOViewer() {
     isSceneLoading,
     isAssetsLoading,
   } = useZakeke();
-  // const { tryOnVisibility, setTryOnVisibility } = useZakekeTryOn();
   const tryOnSettings = getTryOnSettings();
   const isMobile = isAndroid || isIOS;
 
@@ -53,12 +54,15 @@ export default function VTOViewer() {
 
   const handleWebcamError = () => {
     viewerRef.current?.setVisible?.(false);
-    console.log(
-      "Oops! It looks like your device doesn't have a camera. To use the Virtual Try-On, please ensure your device has a functioning camera."
-    );
+    setStatus({
+      errorType: "webcam",
+      isError: true,
+      message:
+        "Oops! It looks like your device doesn't have a camera. To use the Virtual Try-On, please ensure your device has a functioning camera.",
+    });
   };
 
-  const renderContent = () => {
+  const renderContent = useCallback(() => {
     if (
       isSceneLoading ||
       isAssetsLoading ||
@@ -75,6 +79,16 @@ export default function VTOViewer() {
         <div className="flex items-center justify-center h-full">
           <div className="bg-white p-8 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Scan QR Code</h2>
+          </div>
+        </div>
+      );
+    }
+
+    if (status.isError && status.errorType === "webcam") {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">{status.message}</h2>
           </div>
         </div>
       );
@@ -106,14 +120,23 @@ export default function VTOViewer() {
         }}
       >
         <div className="flex items-center justify-center h-full">
-          <div className="bg-white p-8 rounded-lg shadow-lg">
+          <div className="bg-white p-8 rounded-lg shadow-lg flex items-center justify-center">
             <div className="w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full animate-spin mb-4"></div>
             <div className="text-sm font-medium">Loading VTO...</div>
           </div>
         </div>
       </ZakekeTryOnViewer>
     );
-  };
+  }, [
+    status,
+    deeparUrl,
+    isSceneLoading,
+    isAssetsLoading,
+    hasVTryOnEnabled,
+    tryOnSettings,
+    viewerRef,
+    setIsReady,
+  ]);
 
   return (
     <div className="h-screen w-screen">
