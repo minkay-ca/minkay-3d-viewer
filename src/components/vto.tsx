@@ -40,8 +40,8 @@ export default function VTOViewer() {
         setTryOnLoaded(true);
         // setTryOnVisibility(true);
         //ZAKEKE TEAM MODIFICATION (COMMENTED OUT)
-        viewerRef.current?.setVisible?.(true);
-        viewerRef?.current?.changeMode?.(1);
+        // viewerRef.current?.setVisible?.(true);
+        // viewerRef?.current?.changeMode?.(1);
       }
     }
   }, [hasVTryOnEnabled, tryOnSettings, isSceneLoading, isAssetsLoading]);
