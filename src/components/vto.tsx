@@ -16,10 +16,15 @@ export default function VTOViewer() {
     message: "",
   });
   const [deeparUrl, setDeepARUrl] = useState("");
+  const [deeparMobileUrl, setDeepARMobileUrl] = useState<string | undefined>(
+    undefined
+  );
   const {
     hasVTryOnEnabled,
     getTryOnSettings,
     getDeepARDesktopIframeUrl,
+    deepARsceneGLBUrl,
+    getMobileArUrl,
     isSceneLoading,
     isAssetsLoading,
   } = useZakeke();
@@ -101,6 +106,14 @@ export default function VTOViewer() {
         }
       };
       fetchDeepARUrl();
+    }
+
+    if (isMobile) {
+      getMobileArUrl().then((url) => {
+        if (url && typeof url === "string") {
+          setDeepARMobileUrl(url);
+        }
+      });
     }
   }, [
     hasVTryOnEnabled,
@@ -356,6 +369,12 @@ export default function VTOViewer() {
         <p>
           <strong>Status:</strong>{" "}
           {status.isError ? `Error (${status.errorType})` : "OK"}
+        </p>
+        <p>
+          <strong>DeepAR GLB URL:</strong> {deepARsceneGLBUrl || "None"}
+        </p>
+        <p>
+          <strong>DeepAR URL:</strong> {deeparMobileUrl || "None"}
         </p>
       </div>
     </div>
