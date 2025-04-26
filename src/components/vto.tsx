@@ -33,7 +33,7 @@ export default function VTOViewer() {
           hasVTryOnEnabled &&
           tryOnSettings &&
           tryOnSettings?.type === 6 &&
-          !isMobile
+          !isAndroid
         ) {
           const url = await getDeepARDesktopIframeUrl();
           if (url && url.startsWith("https://")) {
@@ -70,6 +70,9 @@ export default function VTOViewer() {
       !tryOnSettings
     ) {
       return null;
+    }
+    if (isIOS && deeparUrl?.startsWith("https://")) {
+      return window.open(deeparUrl, "__BLANK");
     }
 
     if (!isMobile) {
