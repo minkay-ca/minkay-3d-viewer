@@ -72,7 +72,14 @@ export default function VTOViewer() {
       return null;
     }
     if (isIOS && deeparUrl?.startsWith("https://")) {
-      return window.open(deeparUrl, "__BLANK");
+      window.open(deeparUrl, "__BLANK");
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Opening in new tab</h2>
+          </div>
+        </div>
+      );
     }
 
     if (!isMobile) {
