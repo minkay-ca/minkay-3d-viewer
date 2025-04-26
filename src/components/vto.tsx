@@ -71,7 +71,16 @@ export default function VTOViewer() {
     ) {
       return null;
     }
-    if (isIOS && deeparUrl?.startsWith("https://")) {
+    if (isIOS) {
+      if (!deeparUrl?.startsWith("https://")) {
+        return (
+          <div className="flex items-center justify-center h-full">
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <h2 className="text-xl font-semibold mb-4">Invalid DeepAR URL</h2>
+            </div>
+          </div>
+        );
+      }
       window.open(deeparUrl, "__BLANK");
       return (
         <div className="flex items-center justify-center h-full">
@@ -146,6 +155,8 @@ export default function VTOViewer() {
     tryOnSettings,
     viewerRef,
     setIsReady,
+    isMobile,
+    isIOS,
   ]);
 
   return (
