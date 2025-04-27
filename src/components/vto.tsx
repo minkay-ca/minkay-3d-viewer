@@ -227,7 +227,7 @@ export default function VTOViewer() {
       }
 
       if (isIOS) {
-        window.open(deeparUrl, "__BLANK");
+        window.open(deeparUrl, "_blank");
         return (
           <div className="flex items-center justify-center h-full">
             <div className="bg-white p-8 rounded-lg shadow-lg">
