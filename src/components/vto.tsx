@@ -37,48 +37,17 @@ export default function VTOViewer() {
   const tryOnSettings = getTryOnSettings();
   const isMobile = isAndroid || isIOS;
   const needsDeepAR = tryOnSettings?.type === 6 && !isAndroid; // DeepAR needed for iOS & Desktop with type 6
+  const [shouldFetchDeepAR, setShouldFetchDeepAR] = useState(false);
 
   // Effect to manage loading messages and trigger DeepAR fetch
   useEffect(() => {
-    let currentMessage = "Initializing...";
-    let shouldFetchDeepAR = false;
+    if (!hasVTryOnEnabled) return;
+    if (!tryOnSettings) return;
+    if (!needsDeepAR) return;
+    if (isAndroid) return; // DeepAR non richiesto su Android
+    if (isSceneLoading || isAssetsLoading) return; // Non ancora pronti
 
-    if (!hasVTryOnEnabled && !isSceneLoading && !isAssetsLoading) {
-      // Determined VTO is not enabled, maybe show message elsewhere or just stop loading
-      currentMessage = "Virtual Try On not available.";
-    } else if (hasVTryOnEnabled && !tryOnSettings) {
-      currentMessage = "Loading configuration..."; // Waiting for settings
-    } else if (hasVTryOnEnabled && tryOnSettings) {
-      // VTO enabled, settings available
-      if (needsDeepAR && !deeparUrl && !status.isError && !isFetchingDeepAR) {
-        // Need to fetch DeepAR URL and not already fetching/errored
-        shouldFetchDeepAR = true;
-        currentMessage = "Fetching configuration...";
-      } else if (isFetchingDeepAR) {
-        currentMessage = "Fetching configuration...";
-      } else if (status.isError && status.errorType === "config") {
-        currentMessage = "Error loading configuration.";
-      } else if (isSceneLoading) {
-        currentMessage = "Loading scene...";
-      } else if (isAssetsLoading) {
-        currentMessage = "Loading assets...";
-      } else if (!isReady && (isMobile || deeparUrl)) {
-        // For mobile (non-iOS DeepAR) or desktop/iOS after URL is fetched
-        currentMessage = "Preparing viewer...";
-      } else if (isReady && !isViewerLoaded && isMobile && !isIOS) {
-        // Android/Mobile VTO
-        currentMessage = "Initializing viewer...";
-      } else if (isReady && isViewerLoaded) {
-        currentMessage = "Done!"; // Final state before hiding overlay
-      } else {
-        currentMessage = "Loading..."; // Fallback
-      }
-    }
-
-    setLoadingMessage(currentMessage);
-
-    // Trigger fetch outside state update
-    if (shouldFetchDeepAR) {
+    if (!deeparUrl && !status.isError && !isFetchingDeepAR) {
       const fetchDeepARUrl = async () => {
         setIsFetchingDeepAR(true);
         try {
@@ -86,6 +55,9 @@ export default function VTOViewer() {
           if (url && url.startsWith("https://")) {
             console.log("***** url", url);
             setDeepARUrl(url);
+            if (isIOS) {
+              setNeedsManualOpen(true);
+            }
           } else {
             console.error("Invalid DeepAR URL:", url);
             setStatus({
@@ -105,32 +77,30 @@ export default function VTOViewer() {
           setIsFetchingDeepAR(false);
         }
       };
-      fetchDeepARUrl();
-    }
 
-    if (isMobile) {
-      getMobileArUrl().then((url) => {
-        if (url && typeof url === "string") {
-          setDeepARMobileUrl(url);
-        }
-      });
+      fetchDeepARUrl();
     }
   }, [
     hasVTryOnEnabled,
     tryOnSettings,
     needsDeepAR,
-    deeparUrl,
-    isFetchingDeepAR,
+    isAndroid,
     isSceneLoading,
     isAssetsLoading,
-    isReady,
-    isViewerLoaded,
+    deeparUrl,
     status.isError,
-    status.errorType,
-    isMobile,
-    isIOS,
-    getDeepARDesktopIframeUrl, // Added dependency
+    isFetchingDeepAR,
+    getDeepARDesktopIframeUrl,
   ]);
+
+  const [needsManualOpen, setNeedsManualOpen] = useState(false);
+
+  useEffect(() => {
+    if (isIOS && deeparUrl && deeparUrl.startsWith("https://")) {
+      console.log("Ready to open DeepAR URL manually:", deeparUrl);
+      setNeedsManualOpen(true);
+    }
+  }, [deeparUrl]);
 
   // Calculate overall loading state
   const isLoading = useMemo(() => {
@@ -196,7 +166,10 @@ export default function VTOViewer() {
   const handleReady = () => {
     console.log("Viewer is ready");
     setIsReady(true);
-    // Message update is handled by the main useEffect
+
+    if (isAndroid) {
+      setLoadingMessage(""); // O puoi direttamente nascondere il messaggio
+    }
   };
 
   const renderContent = useCallback(() => {
@@ -227,19 +200,29 @@ export default function VTOViewer() {
       }
 
       if (isIOS) {
-        window.open(deeparUrl, "_blank");
-        return (
-          <div className="flex items-center justify-center h-full">
-            <div className="bg-white p-8 rounded-lg shadow-lg">
-              <h2 className="text-xl font-semibold mb-4">
-                Opening VTO experience...
-              </h2>
-              <p className="text-sm">
-                If nothing happens, please check your pop-up blocker.
-              </p>
+        if (needsManualOpen) {
+          return (
+            <div className="flex flex-col items-center justify-start pt-20 h-full">
+              <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+                <h2 className="text-xl font-semibold mb-4">
+                  Virtual Try-On Ready
+                </h2>
+                <p className="text-sm mb-6">
+                  Tap the button below to start the Virtual Try-On experience.
+                </p>
+                <button
+                  onClick={() => {
+                    window.open(deeparUrl, "_blank");
+                    setNeedsManualOpen(false);
+                  }}
+                  className="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded"
+                >
+                  Open Virtual Try-On
+                </button>
+              </div>
             </div>
-          </div>
-        );
+          );
+        }
       }
 
       if (!isMobile) {
@@ -331,7 +314,7 @@ export default function VTOViewer() {
       {/* Added relative positioning */}
       {renderContent()}
       {/* Updated Loading Overlay */}
-      {isLoading && (
+      {isLoading && loadingMessage && (
         <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-20">
           <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center text-center w-64">
             {" "}
