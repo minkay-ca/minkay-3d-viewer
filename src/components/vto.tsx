@@ -225,7 +225,7 @@ export default function VTOViewer() {
         }
       }
 
-      if (!isMobile) {
+      if (!isMobile && deeparUrl?.startsWith("https://")) {
         // Desktop
         return (
           <div className="flex items-center justify-center h-full">
@@ -235,10 +235,13 @@ export default function VTOViewer() {
                 Please scan the QR code with your mobile device to start the
                 Virtual Try-On.
               </p>
-              {/* TODO: Render actual QR code using deeparUrl */}
-              <div className="w-40 h-40 bg-gray-200 mx-auto flex items-center justify-center">
-                <span className="text-gray-500">QR Placeholder</span>
-              </div>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                  deeparUrl
+                )}`}
+                alt="Scan QR Code for Virtual Try-On"
+                className="w-40 h-40 mx-auto"
+              />
             </div>
           </div>
         );
